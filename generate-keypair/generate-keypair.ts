@@ -11,5 +11,4 @@ import "dotenv/config"
 // console.log(`✅ Finished!`)
 
 const keypair = getKeypairFromEnvironment("SECRET_KEY")
-// print keypair
 console.log(`The public key is: `, keypair.publicKey.toBase58())

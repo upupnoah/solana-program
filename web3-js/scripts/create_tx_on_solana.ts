@@ -4,7 +4,7 @@ import "dotenv/config"
 
 const transaction = new Transaction()
 
-const sender = new PublicKey("2x1rzVKHDK7e9jfx4msFHfSQq1WRZLEpNFrvSfhXyjzW")
+const sender = new PublicKey("2JVqELzPJFPkFXSmbbxNJtGVq4vryZoWrkFXJ5kNvppG")
 const recipient = new PublicKey("HU4W3Ra2UMCsBGXRdveHQeLNVtPbNGLBDkvbAhVDEwXr")
 
 const amount = 0.1
@@ -17,7 +17,7 @@ const sendSolInstruction = SystemProgram.transfer({
 
 transaction.add(sendSolInstruction)
 
-const connection = new Connection("https://api.testnet.solana.com", "confirmed");
+const connection = new Connection("https://api.devnet.solana.com", "confirmed");
 const keypair = getKeypairFromEnvironment("SECRET_KEY")
 const signature = sendAndConfirmTransaction(
     connection,

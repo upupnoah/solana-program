@@ -29,6 +29,7 @@ async function buildCreateMintTransaction(
         }),
         // token mint 是一个特殊的账户，它存储了 token 的元数据，比如 mint 的所有者，decimals，以及其他的一些信息
         // init token-mint account
+        // 使用上面的新账户来初始化 新的 token 账户
         token.createInitializeMintInstruction(
             accountKeypair.publicKey, // new account's pubkey
             decimals,
@@ -48,3 +49,181 @@ async function buildCreateMintTransaction(
 //     owner, // 令牌账户的所有者，只有这个所有者可以授权减少账户的代币余额
 //     keypair // 创建账户的密钥对，通常用于为新账户签名和提供安全性
 // );
+
+
+// 创建关联的 token 账户，用于存储特定 mint 的代币，并且为这些代币指定一个所有者
+// const associatedTokenAccount = await token.createAssociatedTokenAccount(
+//     connection, // 连接到 solana 网络的连接对象
+//     payer, // 用于支付创建账户的费用
+//     mint, // 代币的发行源地址，它决定了令牌账户将持有哪种代币
+//     owner, // 令牌账户的所有者，只有这个所有者可以授权减少账户的代币余额
+// );
+
+// 没有则创建，有则获取
+// const associatedTokenAccount = await token.getOrCreateAssociatedTokenAccount(
+//     connection, // 连接到 solana 网络的连接对象
+//     payer, // 用于支付创建账户的费用
+//     mint, // 代币的发行源地址，它决定了令牌账户将持有哪种代币
+//     owner, // 令牌账户的所有者，只有这个所有者可以授权减少账户的代币余额
+// );
+
+
+// 创建关联的 token 账户
+async function buildCreateAssociatedTokenAccountTransaction(
+    payer: web3.PublicKey,
+    mint: web3.PublicKey
+): Promise<web3.Transaction> {
+    const associatedTokenAddress = await token.getAssociatedTokenAddress(mint, payer, false);
+
+    const transaction = new web3.Transaction().add(
+        token.createAssociatedTokenAccountInstruction(
+            payer,
+            associatedTokenAddress,
+            payer,
+            mint
+        )
+    )
+
+    return transaction
+}
+
+
+// const transactionSignature = await token.mintTo(
+//     connection,
+//     payer,
+//     mint,
+//     destination,
+//     authority,
+//     amount
+// );
+
+// mint 代币
+async function buildMintToTransaction(
+    authority: web3.PublicKey,
+    mint: web3.PublicKey,
+    amount: number,
+    destination: web3.PublicKey
+): Promise<web3.Transaction> {
+    const transaction = new web3.Transaction().add(
+        token.createMintToInstruction(
+            mint,
+            destination,
+            authority,
+            amount
+        )
+    )
+
+    return transaction
+}
+
+
+// transfer
+// const transactionSignature = await token.transfer(
+//     connection,
+//     payer,
+//     source, // 代币的来源地址
+//     destination, // 代币的目标地址
+//     owner,
+//     amount
+// )
+
+// transfer 底层实现
+async function buildTransferTransaction(
+    source: web3.PublicKey,
+    destination: web3.PublicKey,
+    owner: web3.PublicKey,
+    amount: number
+): Promise<web3.Transaction> {
+    const transaction = new web3.Transaction().add(
+        token.createTransferInstruction(
+            source,
+            destination,
+            owner,
+            amount,
+        )
+    )
+
+    return transaction
+}
+
+// burn
+// const transactionSignature = await token.burn(
+//     connection,
+//     payer,
+//     account,
+//     mint,
+//     owner,
+//     amount
+// )
+
+// burn 底层
+async function buildBurnTransaction(
+    account: web3.PublicKey,
+    mint: web3.PublicKey,
+    owner: web3.PublicKey,
+    amount: number
+): Promise<web3.Transaction> {
+    const transaction = new web3.Transaction().add(
+        token.createBurnInstruction(
+            account,
+            mint,
+            owner,
+            amount
+        )
+    )
+    return transaction
+}
+
+// Approve Delegate 批准代理(委托)
+// const transactionSignature = await token.approve(
+//     connection,
+//     payer,
+//     account,
+//     delegate,
+//     owner, // token账户的所有者账户
+//     amount, //  委托账户可以transfer或burn的最大代币数量
+// )
+
+// import * as web3 from '@solana/web3'
+// import * as token from '@solana/spl-token'
+async function buildApproveTransaction(
+    account: web3.PublicKey,
+    delegate: web3.PublicKey,
+    owner: web3.PublicKey,
+    amount: number
+): Promise<web3.Transaction> {
+    const transaction = new web3.Transaction().add(
+        token.createApproveInstruction(
+            account,
+            delegate,
+            owner,
+            amount
+        )
+    )
+
+    return transaction
+}
+
+// Revoke Delegate 撤销代理
+// const transactionSignature = await token.revoke(
+//     connection,
+//     payer,
+//     account,
+//     owner,
+// )
+
+// 底层实现, 实际使用的时候用上面的方法
+// import * as web3 from '@solana/web3'
+// import * as token from '@solana/spl-token'
+async function buildRevokeTransaction(
+    account: web3.PublicKey,
+    owner: web3.PublicKey,
+): Promise<web3.Transaction> {
+    const transaction = new web3.Transaction().add(
+        token.createRevokeInstruction(
+            account,
+            owner,
+        )
+    )
+    return transaction
+}
